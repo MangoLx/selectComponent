@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    .root {
+      margin: 100px auto;
+      position: relative;
+    }
+
+    .ipt {
+      width: 200px;
+      height: 30px;
+      border: 1px solid #000;
+      border-radius: 15px;
+      box-sizing: border-box;
+      margin: 0 auto;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      flex: 1;
+      padding-left: 15px;
+
+    }
+
+    .ipt .content {
+      flex: 1;
+      border-radius: 15px;
+      outline: none;
+      border: none;
+    }
+
+    .ipt .btn {
+      width: 30px;
+      line-height: 30px;
+      cursor: pointer;
+    }
+
+    .list {
+      height: 100px;
+      overflow: auto;
+      list-style: none;
+      position: absolute;
+      top: 30px;
+      display: none;
+    }
+
+    .list>li {
+      text-align-last: left;
+      width: 150px;
+      line-height: 25px;
+      cursor: pointer;
+      border: 1px solid #000;
+      border-top: none;
+    }
+
+    .list>li>span {
+      color: #f00;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="root">
+    <div class="ipt">
+      <input class="content" placeholder="请输入你的选择" id='input' />
+      <span class="btn" id="btn">></span>
+      <ul class="list" id="list">
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function () {
+      function Select(options) {
+        // 初始化方法
+        this.init = function () {
+          // 获取输入框
+          this.ipt = document.getElementById(options.input)
+          this.btn = document.getElementById(options.btn) // 获取点击按钮
+          this.list = document.getElementById(options.list)  //输入框
+          // 添加数据
+          this.readData()
+          // 绑定事件函数
+          this.addEvent()
+        }
+        this.initData = function (dataArr) {
+          this.data = dataArr
+          // 添加到ul
+          this.addLists(this.data)
+        }
+        // 添加到ul
+        this.addLists = function (items) {
+          var fragment = document.createDocumentFragment()
+          for (var i = 0; i < items.length; i++) {
+            var li = document.createElement('li')
+            li.innerHTML = items[i].showStr
+            li.setAttribute('realStr', items[i].realStr)
+            fragment.appendChild(li)
+          }
+          this.list.appendChild(fragment)
+        }
+        // 绑定事件
+        this.addEvent = function () {
+          var that = this
+          this.ipt.onkeyup = function () {
+            that.search(that.ipt.value)
+          }
+          this.btn.onclick = function () {
+            if (that.list.innerHTML === '') {
+              that.readData()
+            }
+            if (that.list.style.display === '') {
+              that.list.style.display = 'block'
+            } else {
+              // 切换显示选择框
+              that.list.style.display === 'none' ? that.list.style.display = 'block' : that.list.style.display = 'none'
+            }
+          }
+          // 条目点击绑定
+          this.list.onclick = function (e) {
+            e = e || window.event
+            target = e.target || e.srcElement
+            // 事件代理
+            if (target.tagName === 'LI') {
+              that.clickItems(that)
+            }
+          }
+        }
+        // 搜索事件
+        this.search = function (val) {
+          if (val === '') {
+            this.list.style.display = 'none'
+            this.list.innerHTML = ''
+            return
+          }
+          var reg = new RegExp('^' + val)
+          var arr = []
+          for (var i = 0; i < this.data.length; i++) {
+            // 如果存在字符
+            if (reg.test(this.data[i].realStr)) {
+              // 字符标红
+              // 字符串截取
+              arr.push(
+                { showStr: this.subInputVal(val, this.data[i].realStr), realStr: this.data[i].realStr }
+              )
+            }
+          }
+          // 清空之前的lists
+          this.list.innerHTML = ''
+          // 设置显示
+          this.addLists(arr)
+          this.list.style.display = 'block'
+        }
+        // 点击选项事件
+        this.clickItems = function () {
+          // 设置给input
+          this.ipt.value = target.getAttribute('realStr')
+          // 隐藏
+          this.list.style.display = 'none'
+        }
+        // 字符串截取标红返回
+        this.subInputVal = function (str, allStr) {
+          // 标红字符串
+          var totalStr = '<span>' + str + '</span>'
+          var otherStr = allStr.substr(str.length)
+          return totalStr + otherStr
+        }
+        // 异步加载数据
+        this.readData = function () {
+          var that = this
+          setTimeout(function () {
+            var data = [
+              { showStr: '金牛区', realStr: '金牛区' },
+              { showStr: '锦江区', realStr: '锦江区' },
+              { showStr: '青羊区', realStr: '青羊区' },
+              { showStr: '成华区', realStr: '成华区' },
+              { showStr: '武侯区', realStr: '武侯区' }
+            ]
+            that.initData(data)
+          }, 1000)
+        }
+      }
+      new Select({
+        input: 'input',
+        btn: 'btn',
+        list: 'list'
+      }).init()
+    }
+  </script>
+</body>
+
+</html>
